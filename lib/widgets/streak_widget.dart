@@ -1,64 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/streak_service.dart';
 
-class StreakWidget extends StatelessWidget {
+class StreakWidget extends StatefulWidget {
   const StreakWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final streak = context.watch<StreakService>();
+  State<StreakWidget> createState() => _StreakWidgetState();
+}
 
-    return AnimatedScale(
-      scale: streak.isFrozen ? 0.95 : 1.05,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutBack,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: streak.isFrozen
-                ? [Colors.blueGrey, Colors.blueGrey.shade700]
-                : [Colors.orange, Colors.redAccent],
+class _StreakWidgetState extends State<StreakWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        final glow = 6 + _controller.value * 6;
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              colors: [Colors.orange, Colors.deepOrange],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orange.withOpacity(0.6),
+                blurRadius: glow,
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(
-              streak.isFrozen ? Icons.ac_unit : Icons.local_fire_department,
-              color: Colors.white,
-              size: 36,
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${streak.streak} дней подряд',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (streak.isFrozen)
+          child: Row(
+            children: const [
+              Icon(Icons.local_fire_department, color: Colors.white, size: 48),
+              SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Заморозка: ${streak.freezeDays}/3',
-                    style: const TextStyle(color: Colors.white70),
+                    '🔥 Серия: 4 дня',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-              ],
-            ),
-          ],
-        ),
-      ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Цель выполнена сегодня',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

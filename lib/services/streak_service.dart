@@ -2,67 +2,81 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StreakService extends ChangeNotifier {
-  static const _stepsGoal = 8000;
+  static const _streakKey = 'streak_count';
+  static const _lastDayKey = 'last_active_day';
+  static const _freezeKey = 'freeze_days';
 
   int _streak = 0;
   int _freezeDays = 0;
-  DateTime? _lastActiveDay;
+  DateTime? _lastDay;
 
   int get streak => _streak;
   int get freezeDays => _freezeDays;
-  bool get isFrozen => _freezeDays > 0;
 
+  /// 🔄 загрузка сохранённых данных
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _streak = prefs.getInt('streak') ?? 0;
-    _freezeDays = prefs.getInt('freezeDays') ?? 0;
 
-    final last = prefs.getString('lastActiveDay');
+    _streak = prefs.getInt(_streakKey) ?? 0;
+    _freezeDays = prefs.getInt(_freezeKey) ?? 0;
+
+    final last = prefs.getString(_lastDayKey);
     if (last != null) {
-      _lastActiveDay = DateTime.parse(last);
-      _checkMissedDays();
+      _lastDay = DateTime.parse(last);
     }
 
+    _checkStreak();
     notifyListeners();
   }
 
-  Future<void> updateSteps(int todaySteps) async {
-    if (todaySteps < _stepsGoal) return;
-
+  /// ✅ вызываем, когда цель шагов выполнена
+  Future<void> completeDay() async {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final prefs = await SharedPreferences.getInstance();
 
-    if (_lastActiveDay == today) return;
+    if (_lastDay == null || !_isSameDay(now, _lastDay!)) {
+      _streak++;
+      _freezeDays = 0;
+      _lastDay = now;
 
-    _streak++;
-    _freezeDays = 0;
-    _lastActiveDay = today;
+      await prefs.setInt(_streakKey, _streak);
+      await prefs.setInt(_freezeKey, _freezeDays);
+      await prefs.setString(_lastDayKey, now.toIso8601String());
 
-    await _save();
+      notifyListeners();
+    }
+  }
+
+  /// ❄️ вызываем, если цель не выполнена
+  Future<void> missDay() async {
+    _freezeDays++;
+
+    if (_freezeDays > 3) {
+      _streak = 0;
+      _freezeDays = 0;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_streakKey, _streak);
+    await prefs.setInt(_freezeKey, _freezeDays);
+
     notifyListeners();
   }
 
-  void _checkMissedDays() {
-    if (_lastActiveDay == null) return;
+  /// 🔍 проверка при запуске
+  void _checkStreak() {
+    if (_lastDay == null) return;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final diff = today.difference(_lastActiveDay!).inDays;
+    final diff = DateTime.now().difference(_lastDay!).inDays;
 
-    if (diff == 0) return;
-
-    if (diff <= 3) {
-      _freezeDays = diff;
-    } else {
+    if (diff == 1) {
+      _freezeDays++;
+    } else if (diff > 1) {
       _streak = 0;
       _freezeDays = 0;
     }
   }
 
-  Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('streak', _streak);
-    await prefs.setInt('freezeDays', _freezeDays);
-    await prefs.setString('lastActiveDay', _lastActiveDay!.toIso8601String());
-  }
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }
