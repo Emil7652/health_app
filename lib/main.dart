@@ -1,47 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:health_app/services/streak_service.dart';
 import 'package:provider/provider.dart';
-
 import 'auth/auth_service.dart';
+import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(create: (_) => AuthService(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => StreakService()..load()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool isDark = false;
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
+    final theme = context.watch<ThemeProvider>();
+
+    if (!auth.initialized || !theme.initialized) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: SplashScreen(),
+      );
+    }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      home: auth.isLoggedIn
-          ? DashboardScreen(
-              isDark: isDark,
-              onToggleTheme: () {
-                setState(() => isDark = !isDark);
-              },
-            )
-          : LoginScreen(
-              onLogin: () {
-                setState(() {});
-              },
-            ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: theme.mode,
+      home: auth.isLoggedIn ? const DashboardScreen() : const LoginScreen(),
     );
   }
 }
