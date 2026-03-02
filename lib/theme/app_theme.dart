@@ -1,42 +1,41 @@
+// lib/theme/app_theme.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final ThemeData lightTheme = ThemeData(
-  brightness: Brightness.light,
-  primarySwatch: Colors.green,
-  scaffoldBackgroundColor: Colors.grey.shade100,
-  cardColor: Colors.white,
-);
-
-final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primarySwatch: Colors.green,
-  scaffoldBackgroundColor: const Color(0xFF121212),
-  cardColor: const Color(0xFF1E1E1E),
-);
-
 class ThemeProvider extends ChangeNotifier {
+  static const _key = 'dark_mode';
+
   bool _dark = false;
-  bool _initialized = false;
+  bool initialized = false;
 
-  bool get initialized => _initialized;
   ThemeMode get mode => _dark ? ThemeMode.dark : ThemeMode.light;
+  bool get isDark => _dark;
 
-  ThemeProvider() {
-    _load();
-  }
-
-  Future<void> _load() async {
+  Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _dark = prefs.getBool('dark_theme') ?? false;
-    _initialized = true;
+    _dark = prefs.getBool(_key) ?? false;
+    initialized = true;
     notifyListeners();
   }
 
   Future<void> toggle() async {
     _dark = !_dark;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_theme', _dark);
+    await prefs.setBool(_key, _dark);
     notifyListeners();
   }
 }
+
+/// 🎨 Светлая тема
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  useMaterial3: true,
+  colorSchemeSeed: Colors.blueAccent,
+);
+
+/// 🌙 Тёмная тема
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  useMaterial3: true,
+  colorSchemeSeed: Colors.blueAccent,
+);
