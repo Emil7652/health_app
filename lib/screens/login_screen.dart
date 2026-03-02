@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const Icon(Icons.favorite, size: 80, color: Colors.redAccent),
             const SizedBox(height: 16),
             const Text(
-              'Health App',
+              'LifePulse',
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),

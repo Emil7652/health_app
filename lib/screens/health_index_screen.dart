@@ -19,7 +19,7 @@ class HealthIndexScreen extends StatelessWidget {
     final currentIndex = _indexData.last.y;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Health Index')),
+      appBar: AppBar(title: const Text('Индекс Здоровья')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -67,7 +67,7 @@ class HealthIndexScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Динамика Health Index',
+                      'Динамика Индекса Здоровья',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

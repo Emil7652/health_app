@@ -1,234 +1,136 @@
 import 'package:flutter/material.dart';
-import '../widgets/streak_widget.dart';
+import 'package:provider/provider.dart';
+
+import '../services/streak_service.dart';
 import 'steps_screen.dart';
 import 'stress_screen.dart';
-import 'pulse_screen.dart';
 import 'sleep_screen.dart';
+import 'pulse_screen.dart';
 import 'spo2_screen.dart';
-import 'analytics_screen.dart';
+import 'health_index_screen.dart';
+import 'steps_goal_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final streak = context.watch<StreakService>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Обзор здоровья'),
+        title: const Text('LifePulse'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
+            icon: const Icon(Icons.flag),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
+                MaterialPageRoute(builder: (_) => StepsGoalScreen()),
               );
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔥 STREAK
-            const StreakWidget(),
-            const SizedBox(height: 24),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _StreakCard(streak: streak),
+          const SizedBox(height: 16),
 
-            /// 📊 Основные показатели
-            Text(
-              'Основные показатели',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.1,
-              children: [
-                const _DashboardCard(
-                  title: 'Шаги',
-                  value: '8 420',
-                  unit: 'шагов',
-                  icon: Icons.directions_walk,
-                  color: Colors.blue,
-                  screen: StepsScreen(),
-                ),
-                const _DashboardCard(
-                  title: 'Пульс',
-                  value: '72',
-                  unit: 'уд/мин',
-                  icon: Icons.favorite,
-                  color: Colors.redAccent,
-                  screen: PulseScreen(),
-                ),
-                const _DashboardCard(
-                  title: 'Стресс',
-                  value: '62%',
-                  unit: 'уровень',
-                  icon: Icons.self_improvement,
-                  color: Colors.orange,
-                  screen: StressScreen(),
-                ),
-                _DashboardCard(
-                  title: 'Сон',
-                  value: '7.4',
-                  unit: 'часа',
-                  icon: Icons.bedtime,
-                  color: Colors.indigo,
-                  screen: SleepScreen(),
-                ),
-                const _DashboardCard(
-                  title: 'SpO₂',
-                  value: '98%',
-                  unit: 'кислород',
-                  icon: Icons.bloodtype,
-                  color: Colors.green,
-                  screen: Spo2Screen(),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 32),
-
-            /// 📈 Аналитика
-            Text(
-              'Аналитика',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            _WideAnalyticsCard(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
-                );
-              },
-            ),
-          ],
-        ),
+          _NavCard(
+            title: 'Шаги',
+            icon: Icons.directions_walk,
+            screen: const StepsScreen(),
+          ),
+          _NavCard(
+            title: 'Стресс',
+            icon: Icons.psychology,
+            screen: const StressScreen(),
+          ),
+          _NavCard(title: 'Сон', icon: Icons.bedtime, screen: SleepScreen()),
+          _NavCard(
+            title: 'Пульс',
+            icon: Icons.favorite,
+            screen: const PulseScreen(),
+          ),
+          _NavCard(
+            title: 'SpO₂',
+            icon: Icons.bloodtype,
+            screen: const Spo2Screen(),
+          ),
+          _NavCard(
+            title: 'Индекс здоровья',
+            icon: Icons.insights,
+            screen: const HealthIndexScreen(),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _DashboardCard extends StatelessWidget {
+class _NavCard extends StatelessWidget {
   final String title;
-  final String value;
-  final String unit;
   final IconData icon;
-  final Color color;
   final Widget screen;
 
-  const _DashboardCard({
+  const _NavCard({
     required this.title,
-    required this.value,
-    required this.unit,
     required this.icon,
-    required this.color,
     required this.screen,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
-      },
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: title,
-              child: Icon(icon, size: 36, color: color),
-            ),
-            const Spacer(),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              unit,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+        },
       ),
     );
   }
 }
 
-class _WideAnalyticsCard extends StatelessWidget {
-  final VoidCallback onTap;
+class _StreakCard extends StatelessWidget {
+  final StreakService streak;
 
-  const _WideAnalyticsCard({required this.onTap});
+  const _StreakCard({required this.streak});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: onTap,
-      child: Container(
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            colors: [Colors.deepPurple, Colors.deepPurpleAccent],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.deepPurple.withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
         child: Row(
-          children: const [
-            Icon(Icons.show_chart, color: Colors.white, size: 40),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                'Посмотреть аналитику за 7 дней',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          children: [
+            Icon(
+              Icons.local_fire_department,
+              size: 48,
+              color: streak.todayCompleted ? Colors.orange : Colors.grey,
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.white),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Серия: ${streak.currentStreak} дней',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  streak.todayCompleted
+                      ? 'Цель на сегодня выполнена'
+                      : 'Цель на сегодня не выполнена',
+                ),
+              ],
+            ),
           ],
         ),
       ),
