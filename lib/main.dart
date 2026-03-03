@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,20 +17,19 @@ void main() {
         ChangeNotifierProvider(create: (_) => ThemeProvider()..load()),
         ChangeNotifierProvider(create: (_) => StreakService()..load()),
       ],
-      child: const MyApp(),
+      child: const AppRoot(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AppRoot extends StatelessWidget {
+  const AppRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
     final theme = context.watch<ThemeProvider>();
 
-    // ⏳ Пока грузятся настройки
     if (!auth.initialized || !theme.initialized) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -41,9 +39,9 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
       themeMode: theme.mode,
+      theme: ThemeData.light(useMaterial3: true),
+      darkTheme: ThemeData.dark(useMaterial3: true),
       home: auth.isLoggedIn ? const DashboardScreen() : const LoginScreen(),
     );
   }
