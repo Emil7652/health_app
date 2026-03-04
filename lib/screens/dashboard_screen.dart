@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:health_app/screens/steps_goal_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/streak_widget.dart';
@@ -75,13 +76,21 @@ class DashboardScreen extends StatelessWidget {
               crossAxisSpacing: 16,
               childAspectRatio: 1.1,
               children: [
-                const _DashboardCard(
+                _DashboardCard(
                   title: 'Шаги',
                   value: '8 420',
-                  unit: 'шагов',
+                  unit: '',
                   icon: Icons.directions_walk,
                   color: Colors.blue,
-                  screen: StepsScreen(),
+                  screen: const StepsScreen(),
+                  onLongPress: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const StepsGoalScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const _DashboardCard(
                   title: 'Пульс',
@@ -94,7 +103,7 @@ class DashboardScreen extends StatelessWidget {
                 const _DashboardCard(
                   title: 'Стресс',
                   value: '62%',
-                  unit: 'уровень',
+                  unit: '',
                   icon: Icons.self_improvement,
                   color: Colors.orange,
                   screen: StressScreen(),
@@ -110,7 +119,7 @@ class DashboardScreen extends StatelessWidget {
                 const _DashboardCard(
                   title: 'SpO₂',
                   value: '98%',
-                  unit: 'кислород',
+                  unit: '',
                   icon: Icons.bloodtype,
                   color: Colors.green,
                   screen: Spo2Screen(),
@@ -151,6 +160,7 @@ class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final Widget screen;
+  final VoidCallback? onLongPress;
 
   const _DashboardCard({
     required this.title,
@@ -159,6 +169,8 @@ class _DashboardCard extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.screen,
+    this.onLongPress,
+    super.key,
   });
 
   @override
@@ -168,8 +180,16 @@ class _DashboardCard extends StatelessWidget {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
       },
+      onLongPress: title == 'Шаги'
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StepsGoalScreen()),
+              );
+            }
+          : null,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: Theme.of(context).colorScheme.surface,
@@ -184,23 +204,22 @@ class _DashboardCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Hero(
-              tag: title,
-              child: Icon(icon, size: 36, color: color),
-            ),
-            const Spacer(),
+            Icon(icon, size: 34, color: color),
+
+            const Spacer(), // ✅ ВМЕСТО Expanded
+
             Text(
               value,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
               unit,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
