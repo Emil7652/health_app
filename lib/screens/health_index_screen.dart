@@ -75,7 +75,6 @@ class HealthIndexScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    /// 🔒 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
                     AspectRatio(
                       aspectRatio: 1.7,
                       child: ClipRRect(

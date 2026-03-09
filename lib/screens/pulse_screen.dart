@@ -1,136 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class PulseScreen extends StatelessWidget {
-  const PulseScreen({super.key});
+  PulseScreen({super.key});
+
+  final List<double> sleepHours = [85, 96, 110, 87, 90, 89, 86];
 
   @override
   Widget build(BuildContext context) {
+    final avgSleep = sleepHours.reduce((a, b) => a + b) / sleepHours.length;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Пульс"), centerTitle: true),
-      body: Padding(
+      appBar: AppBar(title: const Text('Пульс')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// CURRENT VALUE CARD
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+            _infoCard(
+              title: 'Средний пульс',
+              value: '${avgSleep.toStringAsFixed(1)} уд/мин',
+              subtitle: avgSleep >= 7
+                  ? 'Хороший пульс'
+                  : 'Слишком низкий пульс, стоит обратиться к врачу',
+            ),
+            const SizedBox(height: 16),
+
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(
-                children: const [
-                  Icon(Icons.favorite, color: Colors.red, size: 40),
-                  SizedBox(height: 10),
-                  Text(
-                    "72",
-                    style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "bpm",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    "Нормальный уровень",
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Динамика среднего пульса за неделю',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                    const SizedBox(height: 12),
 
-            const SizedBox(height: 24),
-
-            /// GRAPH CARD
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Theme.of(context).colorScheme.surface,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "График за 7 дней",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-
-                  /// Fake graph placeholder
-                  SizedBox(
-                    height: 120,
-                    child: Center(child: Text("Здесь будет график")),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// STATS
-            Row(
-              children: [
-                Expanded(
-                  child: _StatCard(title: "Средний", value: "72", unit: "bpm"),
+                    AspectRatio(
+                      aspectRatio: 1.6,
+                      child: LineChart(_sleepChart()),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(title: "Макс", value: "102", unit: "bpm"),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(title: "Мин", value: "62", unit: "bpm"),
-                ),
-              ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String unit;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.unit,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).colorScheme.surface,
+  Widget _infoCard({
+    required String title,
+    required String value,
+    required String subtitle,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(subtitle),
+          ],
+        ),
       ),
-      child: Column(
-        children: [
-          Text(title, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    );
+  }
+
+  LineChartData _sleepChart() {
+    return LineChartData(
+      minY: 0,
+      maxY: 120,
+      gridData: FlGridData(show: true),
+      titlesData: FlTitlesData(
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, meta) {
+              const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+              return Text(days[value.toInt() % 7]);
+            },
           ),
-          Text(unit, style: const TextStyle(fontSize: 12)),
-        ],
+        ),
       ),
+      lineBarsData: [
+        LineChartBarData(
+          spots: List.generate(
+            sleepHours.length,
+            (i) => FlSpot(i.toDouble(), sleepHours[i]),
+          ),
+          isCurved: true,
+          barWidth: 3,
+          dotData: FlDotData(show: true),
+        ),
+      ],
     );
   }
 }

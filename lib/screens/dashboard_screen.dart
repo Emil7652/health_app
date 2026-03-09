@@ -82,7 +82,7 @@ class DashboardScreen extends StatelessWidget {
                   unit: '',
                   icon: Icons.directions_walk,
                   color: Colors.blue,
-                  screen: const StepsScreen(),
+                  screen: StepsScreen(),
                   onLongPress: () {
                     Navigator.push(
                       context,
@@ -92,7 +92,7 @@ class DashboardScreen extends StatelessWidget {
                     );
                   },
                 ),
-                const _DashboardCard(
+                _DashboardCard(
                   title: 'Пульс',
                   value: '72',
                   unit: 'уд/мин',
@@ -100,7 +100,7 @@ class DashboardScreen extends StatelessWidget {
                   color: Colors.redAccent,
                   screen: PulseScreen(),
                 ),
-                const _DashboardCard(
+                _DashboardCard(
                   title: 'Стресс',
                   value: '62%',
                   unit: '',
@@ -116,7 +116,7 @@ class DashboardScreen extends StatelessWidget {
                   color: Colors.indigo,
                   screen: SleepScreen(),
                 ),
-                const _DashboardCard(
+                _DashboardCard(
                   title: 'SpO₂',
                   value: '98%',
                   unit: '',

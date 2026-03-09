@@ -1,58 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
-class Spo2Screen extends StatefulWidget {
-  const Spo2Screen({super.key});
+class Spo2Screen extends StatelessWidget {
+  Spo2Screen({super.key});
 
-  @override
-  State<Spo2Screen> createState() => _Spo2ScreenState();
-}
-
-class _Spo2ScreenState extends State<Spo2Screen> {
-  late final List<Spo2Data> history;
-
-  @override
-  void initState() {
-    super.initState();
-
-    history = List.generate(7, (i) {
-      return Spo2Data(
-        date: DateTime.now().subtract(Duration(days: 6 - i)),
-        value: 93 + (i % 4),
-      );
-    });
-  }
+  final List<double> sleepHours = [100, 98, 99, 100, 95, 97, 100];
 
   @override
   Widget build(BuildContext context) {
-    final avg =
-        history.map((e) => e.value).reduce((a, b) => a + b) / history.length;
+    final avgSleep = sleepHours.reduce((a, b) => a + b) / sleepHours.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('SpO₂')),
-      body: Padding(
+      appBar: AppBar(title: const Text('Сатурация')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${avg.toStringAsFixed(1)}%',
-              style: Theme.of(context).textTheme.displaySmall,
+            _infoCard(
+              title: 'Средняя сатурация',
+              value: '${avgSleep.toStringAsFixed(1)} %',
+              subtitle: avgSleep >= 7
+                  ? 'Хороший уровень сатурации'
+                  : 'Слишком низкая сатурация, рекомендуется обратиться к врачу ',
             ),
-            const SizedBox(height: 12),
-            Text(
-              avg >= 95
-                  ? 'Нормальная сатурация'
-                  : 'Пониженная сатурация, рекомендуется контроль',
+            const SizedBox(height: 16),
+
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Динамика средней сатурации за неделю',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    AspectRatio(
+                      aspectRatio: 1.6,
+                      child: LineChart(_sleepChart()),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class Spo2Data {
-  final DateTime date;
-  final int value;
+  Widget _infoCard({
+    required String title,
+    required String value,
+    required String subtitle,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(subtitle),
+          ],
+        ),
+      ),
+    );
+  }
 
-  Spo2Data({required this.date, required this.value});
+  LineChartData _sleepChart() {
+    return LineChartData(
+      minY: 90,
+      maxY: 110,
+      gridData: FlGridData(show: true),
+      titlesData: FlTitlesData(
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, meta) {
+              const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+              return Text(days[value.toInt() % 7]);
+            },
+          ),
+        ),
+      ),
+      lineBarsData: [
+        LineChartBarData(
+          spots: List.generate(
+            sleepHours.length,
+            (i) => FlSpot(i.toDouble(), sleepHours[i]),
+          ),
+          isCurved: true,
+          barWidth: 3,
+          dotData: FlDotData(show: true),
+        ),
+      ],
+    );
+  }
 }

@@ -13,17 +13,17 @@ class AnalyticsScreen extends StatelessWidget {
         children: const [
           AnalyticsCard(
             title: 'Сон',
-            subtitle: 'Тренд за 7 дней',
+            subtitle: 'Следует стремится к 8 часам',
             value: '7.4 ч',
           ),
           AnalyticsCard(
             title: 'Стресс',
-            subtitle: 'Средний уровень',
+            subtitle: 'Отдыхайте чаще',
             value: '62%',
           ),
           AnalyticsCard(
             title: 'Пульс',
-            subtitle: 'Среднее значение',
+            subtitle: 'Отличный пульс',
             value: '72 bpm',
           ),
         ],
