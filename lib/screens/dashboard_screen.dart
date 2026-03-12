@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:health_app/screens/profile_screen.dart';
 import 'package:health_app/screens/steps_goal_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -45,6 +46,15 @@ class DashboardScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () {
               context.read<AuthService>().logout();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
             },
           ),
         ],

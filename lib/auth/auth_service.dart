@@ -1,41 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService extends ChangeNotifier {
-  bool _loggedIn = false;
-  bool _initialized = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool get isLoggedIn => _loggedIn;
-  bool get initialized => _initialized;
+  bool initialized = true;
 
-  AuthService() {
-    _load();
-  }
+  User? get user => _auth.currentUser;
 
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    _loggedIn = prefs.getBool('logged_in') ?? false;
-    _initialized = true;
+  bool get isLoggedIn => user != null;
+
+  Future<void> login(String email, String password) async {
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
     notifyListeners();
   }
 
-  Future<bool> login(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    if (email.isNotEmpty && password.isNotEmpty) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('logged_in', true);
-      _loggedIn = true;
-      notifyListeners();
-      return true;
-    }
-    return false;
+  Future<void> register(String email, String password) async {
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    notifyListeners();
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('logged_in', false);
-    _loggedIn = false;
+    await _auth.signOut();
+    notifyListeners();
+  }
+
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<void> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) return;
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    await _auth.signInWithCredential(credential);
+
     notifyListeners();
   }
 }

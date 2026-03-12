@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "365689766443",
+    "project_id": "lifepulse-health-app",
+    "storage_bucket": "lifepulse-health-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365689766443:android:2e97b25759eda773d6a06e",
+        "android_client_info": {
+          "package_name": "com.example.health_app_fixed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdsHt6OBFucuKgKcHo6g2q6KA2TEPzQ_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
